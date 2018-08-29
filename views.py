@@ -101,6 +101,48 @@ class LoginUser(MethodView):
             return jsonify({"message": verified_user["error_message"]}), 401
         self.update_user_status(True, user[0])
         return jsonify(verified_user), 200
+    @staticmethod
+    def verify_user_on_login(user, password):
+        """
+        This method verifies a user before having access to the system
+        If valid, It returns a success message with a token
+        Else it returns an error message
+        :param:user: a tuple containing user information
+        :return:
+        """
+        if not user:
+            return {"status": "failure",
+                    'error_message': 'Please enter valid Email address'}
+        if check_password_hash(user[5], password):
+            auth_token = User.encode_token(user[0])
+            if auth_token:
+                response = {"status": "success", "message": "Successfully logged in.",
+                            "auth_token": auth_token.decode()
+                           }
+                return response
+            response = {"status": "failure", "error_message": "Try again"}
+            return response
+
+        return {"status": "failure",
+                'error_message': 'Please enter correct password'}
+
+    @staticmethod
+    def update_user_status(status, user_id):
+        """
+        This method updates a user login status when logged in to true
+        and to false when a user logs out.
+        """
+        user_status_update_sql = """UPDATE "user" SET is_loggedin = %s
+                    WHERE user_id = %s"""
+        if status:
+            edit_data = (True, user_id)
+        else:
+            edit_data = (False, user_id)
+        linkdb.edit(user_status_update_sql, edit_data)
+        if status:
+            return None
+        return {"status": "success",
+                'message': 'You are logged out successfully'}
 
 class Logout(MethodView):
     """
@@ -122,6 +164,6 @@ class Logout(MethodView):
             return jsonify({"status": "failure",
                             'error_message': 'Failed to logout'}), 200
         return jsonify({"message": "Please login"}), 401
-
+     
 
        
