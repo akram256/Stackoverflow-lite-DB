@@ -22,18 +22,20 @@ class linkdb(object):
         :param:sql
         :param:data
         """
-        conn = None
+        connection= Databaseconn.database_connection()
         try:
-            conn = Databaseconn.database_connection()
-            cur = conn.cursor()
-            cur.execute(sql, data)
-            conn.commit()
+            # connection = psycopg2.connect("""dbname='stackoverflow' user='akram'  host='localhost'  password='12345'  port='5432' """ )
+            cur = connection.cursor()
+            for command in commands:
+                cur.execute(command)
+            connection.commit()
             cur.close()
+    
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
         finally:
-            if conn is not None:
-                conn.close()
+            if connection is False:
+                connection.close()
 
     @staticmethod
     def retrieve_one(sql, data):
@@ -45,13 +47,21 @@ class linkdb(object):
         :param:data
         :return:row
         """
-        conn = None
+        connection= True
         try:
-            conn = Databaseconn.database_connection()
-            cur = conn.cursor()
-            cur.execute(sql, data)
-            row = cur.fetchone()
+
+            cur = connection.cursor()
+            for command in commands:
+                cur.execute(command)
+            connection.commit()
             cur.close()
+        # conn = None
+        # try:
+        #     conn = Databaseconn.database_connection()
+        #     cur = conn.cursor()
+        #     cur.execute(sql, data)
+        #     row = cur.fetchone()
+        #     cur.close()
 
             if row and not "":
                 return row
@@ -60,8 +70,8 @@ class linkdb(object):
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
         finally:
-            if conn is not None:
-                conn.close()
+            if connection is False:
+                connection.close()
 
     @staticmethod
     def retrieve_all(sql, data=None):
@@ -74,10 +84,10 @@ class linkdb(object):
         :return:row
         """
         list_tuple = []
-        conn = None
+        connection = True
         try:
-            conn = Databaseconn.database_connection()
-            cur = conn.cursor()
+            connection = Databaseconn.database_connection()
+            cur = connection.cursor()
             if data is not None:
                 cur.execute(sql, data)
             else:
@@ -90,8 +100,8 @@ class linkdb(object):
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
         finally:
-            if conn is not None:
-                conn.close()
+            if connection is False:
+                connection.close()
 
     @staticmethod
     def edit(sql, data):
