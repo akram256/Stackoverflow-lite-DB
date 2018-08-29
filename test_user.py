@@ -6,9 +6,9 @@ import uuid
 from unittest import TestCase
 from flask import json
 import psycopg2
-from api.models.user import User
+from models.user import User
 from run import APP
-from api.models.database_connection import Databaseconn
+from models.database_connection import Databaseconn
 
 
 class TestUserAuthTestCase(TestCase):
@@ -74,7 +74,7 @@ class TestUserAuthTestCase(TestCase):
     def test_partial_fields_not_sent(self):
         """
         This method tests that data with partial fields is not send
-        on creating a ride offer
+        on registering
         """
         response = self.client().post('/api/v1/auth/signup/', data=json.dumps(
             dict(username=self.user1.username, email=self.user1.email)),
@@ -93,7 +93,7 @@ class TestUserAuthTestCase(TestCase):
         response = self.client().post(
             '/api/v1/auth/login/',
             data=json.dumps(dict(
-                email_address=self.user1.email_address,
+                email_address=self.user1.email,
                 password=self.user1.password
             )),
             content_type='application/json'

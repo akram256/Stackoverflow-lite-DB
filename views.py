@@ -94,9 +94,9 @@ class LoginUser(MethodView):
                             'Message': 'All Login details required'}), 401
 
         query = """SELECT * FROM "users" WHERE "email" = %s"""
-        user = linkdb.retrieve_one(query, (post_data['email'], ))
+        user = linkdb.retrieve_one(query, (post_data['email'] ))
         verified_user = self.verify_user_on_login(user, post_data['password'])
-
+    
         if verified_user["status"] == "failure":
             return jsonify({"message": verified_user["error_message"]}), 401
         self.update_user_status(True, user[0])
@@ -113,7 +113,7 @@ class LoginUser(MethodView):
         if not user:
             return {"status": "failure",
                     'error_message': 'Please enter valid Email address'}
-        if check_password_hash(user[5], password):
+        if check_password_hash(user[2], password):
             auth_token = User.encode_token(user[0])
             if auth_token:
                 response = {"status": "success", "message": "Successfully logged in.",
