@@ -1,4 +1,4 @@
-# Stackoverflow-lite-DB
+
 
 # Stackoverflow-lite-DB
 Stackoverflow-lite is a question answering application that provides user with the ability to Post a question  and answers are provided for that question.
