@@ -6,7 +6,7 @@ import uuid
 from unittest import TestCase
 from flask import json
 import psycopg2
-from models.user import User
+from auth.user import User
 from run import APP
 from models.database_connection import Databaseconn
 
@@ -15,25 +15,6 @@ class TestUserAuthTestCase(TestCase):
     """
     Tests run for the api end pints.
     """
-    user1 = User("akram",
-                 "akram@gmail.com",  "222")
-    empty_user = User( "",
-                       "akram.com",  "45")
-    def setUp(self):
-        """
-        Define test variables and initialize app.
-        """
-        APP.config['TESTING'] = True
-        self.app = APP
-
-    def test_app_is_development(self):
-        """
-        This method tests configuration variables such that they are set correctly
-        """
-        self.assertNotEqual(APP.config['SECRET_KEY'], "my-key")
-        self.assertTrue(APP.config['DEBUG'] is True)
-        self.assertTrue(APP.config['TESTING'] is True)
-
     def test_user_registration(self):
         """
         Test a user is successfully created through the api
