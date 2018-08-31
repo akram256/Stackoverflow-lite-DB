@@ -5,6 +5,8 @@ import datetime
 import jwt
 from flask import jsonify
 from config.db_link import linkdb
+from flask_jwt_extended import  jwt_required, create_access_token, get_jwt_identity
+
 
 
 class User(object):
@@ -41,14 +43,15 @@ class User(object):
         Generates the Auth Token
         :return: string
         """
-        from run import APP
+      
         try:
-            token = jwt.encode({"user_id": user_id,
-                                "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=2880)},
-                               APP.secret_key)
+            # token = jwt.encode({"user_id": str(user_id),
+            #                     "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=1)},
+            #                    "APP.secret_key")  
+            token = create_access_token( identity = user_id)                    
             return token
         except Exception as error:
-            return error
+            raise error
 
     @staticmethod
     def decode_token(auth_token):
@@ -57,17 +60,18 @@ class User(object):
         :param auth_token:
         :return:
         """
-        from run import APP
-        try:
-            token = jwt.decode(auth_token, APP.config.get("SECRET_KEY"))
-            return {"user_id": token["user_id"],
-                    "state": "Success"}
-        except jwt.ExpiredSignatureError:
-            return {"error_message": "Signature expired. Please log in again.",
-                    "state": "Failure"}
-        except jwt.InvalidTokenError:
-            return {"error_message": "Invalid token. Please log in again.",
-                    "state": "Failure"}
+        return get_jwt_identity()
+        # try:
+
+        #     token = jwt.decode(auth_token)
+        #     return {"user_id": token["user_id"],
+        #             "state": "Success"}
+        # except jwt.ExpiredSignatureError:
+        #     return {"error_message": "Signature expired. Please log in again buddy.",
+        #             "state": "Failure"}
+        # except jwt.InvalidTokenError:
+        #     return {"error_message": "Invalid token. Hello, Please log in again buddy.",
+        #             "state": "Failure"}
 
     @staticmethod
     def decode_failure(message):

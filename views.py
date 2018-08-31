@@ -13,7 +13,7 @@ class RegisterUser(MethodView):
     """
     View function to register a user via the api
     """
-    
+
     def post(self):
         """
         Register a user, generate their token and add them to the database
@@ -31,10 +31,10 @@ class RegisterUser(MethodView):
         user_turple = linkdb.retrieve_one(query, (post_data['email'], ))
 
         if not user_turple:
-             new_user = User(post_data['username'],post_data['email'],hashed_password)
+            new_user = User(post_data['username'], post_data['email'], hashed_password)
 
-             new_user.save_user()
-             return jsonify({'message': 'Successfully registered',
+            new_user.save_user()
+            return jsonify({'message': 'Successfully registered',
                             "user": new_user.return_user_details()}), 201
         return jsonify({"error_message": 'Failed, User already exists,' +
                                          'Please sign In'}), 400
@@ -50,8 +50,7 @@ class RegisterUser(MethodView):
         """
         if request.content_type == 'application/json':
 
-            keys = ( "username", "email",
-                   "password")
+            keys = ("username", "email", "password")
             if not set(keys).issubset(set(user_request)):
                 return {"status": "failure",
                         "error_message": "Some fields are missing, all fields are required"}
@@ -93,11 +92,9 @@ class LoginUser(MethodView):
             return jsonify({"status": "Missing email address or password",
                             'Message': 'All Login details required'}), 401
 
-        query = """SELECT * FROM "users" WHERE "email" = %s""" 
-        user= linkdb.retrieve_one(query, (post_data['email'], ))
-        print(user)
+        query = """SELECT * FROM "users" WHERE "email" = %s"""
+        user = linkdb.retrieve_one(query, (post_data['email'], ))
         verified_user = self.verify_user_on_login(user, post_data['password'])
-        
         if verified_user["status"] == "failure":
             return jsonify({"message": verified_user["error_message"]}), 401
         self.update_user_status(True, user[0])
@@ -165,6 +162,3 @@ class Logout(MethodView):
             return jsonify({"status": "failure",
                             'error_message': 'Failed to logout'}), 200
         return jsonify({"message": "Please login"}), 401
-     
-
-       

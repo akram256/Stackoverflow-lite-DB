@@ -15,9 +15,7 @@ class Databaseconn(object):
         "dbname='mydb' user='mydb1' host='localhost' password='mydb123' port='5432'"
         :retun: connection
         """
-        #from run import APP
-
-        # if APP.config['TESTING']:
+    
         connection = psycopg2.connect("""dbname='stackoverflow' user='akram'  host='localhost'  password='12345'  port='5432'""" )
         return connection
         
@@ -41,22 +39,38 @@ class Databaseconn(object):
                 )
             """,
             """
-            CREATE TABLE if not exists "Questions" (
+            CREATE TABLE if not exists "questions" (
                     question_id SERIAL PRIMARY KEY,
                     title VARCHAR (50) NOT NULL,
                     question VARCHAR(255) NOT NULL,
-                    date DATE,
-                    time TIME
+                    user_id integer,
+                    FOREIGN KEY (user_id)
+                    REFERENCES users(user_id),
+                    question_date DATE,
+                    question_time TIME
+
+
+                    
                     
                 )
             """,
             """
             CREATE TABLE if not exists "answers" (
                     answer_id SERIAL PRIMARY KEY,
-                    answer VARCHAR(50) NOT NULL
+                    answer VARCHAR(50) NOT NULL,
+                    user_id integer,
+                    question_id integer,
+                    FOREIGN KEY (user_id)
+                    REFERENCES users(user_id),
+                    FOREIGN KEY (question_id)
+                    REFERENCES questions(question_id),
+                    answer_date DATE,
+                    answer_time TIME
                    
+
                 )
             """,)
+
 
         try:
 
@@ -71,6 +85,12 @@ class Databaseconn(object):
         finally:
             if connection is not None:
                 connection.close()
+    
+    # for coomand in commands
+        # self.execute (command)
+    # def delete_tables():
+         
+    
 
 db = Databaseconn()
 # Databaseconn.database_connection() 

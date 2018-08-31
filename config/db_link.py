@@ -1,5 +1,5 @@
 """
-This module is responsible for database transactions.
+This module is responsible for database.
 """
 import psycopg2
 from config.database_connection import Databaseconn
@@ -24,10 +24,8 @@ class linkdb(object):
         """
         connection= Databaseconn.database_connection()
         try:
-            # connection = psycopg2.connect("""dbname='stackoverflow' user='akram'  host='localhost'  password='12345'  port='5432' """ )
             cur = connection.cursor()
-            for command in commands:
-                cur.execute(command)
+            cur.execute(sql, data)
             connection.commit()
             cur.close()
     
@@ -47,21 +45,13 @@ class linkdb(object):
         :param:data
         :return:row
         """
-        connection= True
+        connection = Databaseconn.database_connection()
         try:
-
+            
             cur = connection.cursor()
-            for command in commands:
-                cur.execute(command)
-            connection.commit()
+            cur.execute(sql, data)
+            row = cur.fetchone()
             cur.close()
-        # conn = None
-        # try:
-        #     conn = Databaseconn.database_connection()
-        #     cur = conn.cursor()
-        #     cur.execute(sql, data)
-        #     row = cur.fetchone()
-        #     cur.close()
 
             if row and not "":
                 return row
@@ -70,9 +60,8 @@ class linkdb(object):
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
         finally:
-            if connection is False:
+            if connection is not None:
                 connection.close()
-
     @staticmethod
     def retrieve_all(sql, data=None):
         """
@@ -84,7 +73,7 @@ class linkdb(object):
         :return:row
         """
         list_tuple = []
-        connection = True
+        connection= Databaseconn.database_connection()
         try:
             connection = Databaseconn.database_connection()
             cur = connection.cursor()
@@ -111,18 +100,18 @@ class linkdb(object):
         :param:sql
         :param:data
         """
-        conn = None
+        connection = Databaseconn.database_connection()
         try:
-            conn = Databaseconn.database_connection()
-            cur = conn.cursor()
+            
+            cur = connection.cursor()
             cur.execute(sql, data)
-            updated_rows = cur.rowcount
-            conn.commit()
+            #updated_rows = cur.rowcount
+            connection.commit()
             cur.close()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
         finally:
-            if conn is not None:
-                conn.close()
-        return updated_rows
+            if connection is not None:
+                connection.close()
+        #return updated_rows
                 
