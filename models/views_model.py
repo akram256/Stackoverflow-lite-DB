@@ -5,6 +5,8 @@ from flask import jsonify, request
 from flask.views import MethodView
 from models.questions import GetAllquestion
 from auth.user import User
+from flask_jwt_extended import  jwt_required, create_access_token, get_jwt_identity
+
 
 
 class Question_now(MethodView):
@@ -13,47 +15,38 @@ class Question_now(MethodView):
     """
 
     Questions_fetch = GetAllquestion()
-
+    @jwt_required 
     def get(self, question_id):
         """
         Gets all questions and one question
         :return:
         """
-        token = request.headers.get('auth_token')
+        token = request.headers.get('Authorization')
         if not token:
             return jsonify({"message": "Token is missing"}), 401
 
-        decoded = User.decode_token(request.headers.get('auth_token'))
-        if decoded["state"] == "Failure":
-            return User.decode_failure(decoded["error_message"])
+        user_id = get_jwt_identity()
+        
+        request_sql = """SELECT "users".user_name, question * FROM "questions" LEFT JOIN "users" \ 
+        ON(questions.user_id = "users".user_id) WHERE "questions".user_id != %s"""
+        sql_data = (user_id)
+        question = self.Questions_fetch.get_all_questions(request_sql, sql_data)
 
-        if User.check_login_status(decoded["user_id"]):
-            if not user_id:
-                request_sql = """SELECT "users".user_name, question.* FROM "questions" LEFT JOIN "users"\ 
-                ON(questions.user_id = "users".user_id) WHERE "question".user_id != %s"""
-                sql_data = (decoded["user_id"], )
-                return self.Questions_fetch.get_all_questions(request_sql, sql_data)
-            return self.Questions_fetch.one_question(question_id)
-        return jsonify({"message": "Please login"}), 401
-
-    def post(self, question_id):
+        if question:
+            return question
+        return jsonify({"message": "question not found"}), 40
+    
+    @jwt_required 
+    def post(self):
         """"
         Handles post question
-        :return:
         """
-        token = request.headers.get('auth_token')
-        if not token:
-            return jsonify({"message": "Token is missing"}), 401
 
-        decoded = User.decode_token(request.headers.get('auth_token'))
-        if decoded["state"] == "Failure":
-            return User.decode_failure(decoded["error_message"])
-        if User.check_login_status(decoded["user_id"]):
-            if question_id:
-                return self.Questions_fetch.post_question(decoded["user_id"], question_id)
-            if not request or not request.json:
-                return jsonify({"status_code": 400, "data": str(request.data),
-                                "error_message": "content not JSON"}), 400
-            return self.Questions_fetch.post_question(decoded["user_id"])
+        user_id = get_jwt_identity()
+
+        if not request or not request.json:
+            return jsonify({"status_code": 400, "data": str(request.data),
+                            "error_message": "content not JSON"}), 400
+        return self.Questions_fetch.post_question(user_id)
         return jsonify({"message": "Please login"}), 401
      

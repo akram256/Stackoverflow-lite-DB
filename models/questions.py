@@ -23,17 +23,20 @@ class GetAllquestion(MethodView):
             tuple_list = linkdb.retrieve_all(sql)
 
         question_list = []
-        for question_tuple in tuple_list:
-            question_dict = {
-                "question_id": request_tuple[1],
-                "user_id": request_tuple[2],
-                "title": request_tuple[3],
-                "question": request_tuple[4],
-            }
-            question_list.append(question_dict)
-        return jsonify({"message": "all questions gotten successfully",
-                        "questions": question_list})
-
+        if tuple_list:
+            for question_tuple in tuple_list:
+                question_dict = {
+                    "question_id": request_tuple[1],
+                    "user_id": request_tuple[2],
+                    "title": request_tuple[3],
+                    "question": request_tuple[4],
+                }
+                question_list.append(question_dict)
+            return jsonify({"message": "all questions gotten successfully",
+                            "questions": question_list})
+        return jsonify({"message": "questions not found",
+                            "questions": question_list})
+    
     def one_question(self, question_id):
         """
         This remothod returns a question in
@@ -42,7 +45,7 @@ class GetAllquestion(MethodView):
         :return
         """
         request_sql = """SELECT "users"user_name, question.* FROM "questions" LEFT JOIN "user"\
-         ON(user.user_id = "user".user_id) WHERE "question_id" = %s """
+         ON(users.user_id = "users".user_id) WHERE "question_id" = %s """
         question_turple = linkdb.retrieve_one(request_sql, (question_id, ))
 
         if question_turple is not None:
@@ -59,7 +62,8 @@ class GetAllquestion(MethodView):
                 "question": question
             },
                             "message": "question gotten successfully"})
-        return self.error_message.no_questions_available(question_id)
+        # return self.error_message.no_questions_available(question_id)
+        return None
         
     def post_question(self, user_id):
         """
@@ -83,16 +87,18 @@ class GetAllquestion(MethodView):
             """SELECT "user_id" FROM "users" WHERE "user_id" = %s""",
             (user_id, ))
         if user is None:
-            return self.error_message.no_user_found_response("no question posted", request.json["question_id"])
+            return self.error_message.no_user_found_response("no question posted")
+        
         title = request.json['title']
         question= request.json['question']
-        date= request.json['question']
+        
 
-        question = Question(user_name, title, question)
+        question = Question(title, question)
 
         question_existance = question.check_question_existance()
         if question_existance["status"] == "failure":
             return jsonify({"message": question_existance["message"]}), 400
 
-        question.post_question()
-        return jsonify({"status_code": 201, "message": "Question has been successfully"}), 201
+        question.save_question()
+        return jsonify({"status_code": 201, "message": "Question has been Posted successfully"}), 201
+        return jsonify({"status_code": 404, "message": "No question Posted"}), 404

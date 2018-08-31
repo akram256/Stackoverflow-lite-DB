@@ -1,6 +1,6 @@
 from flask import jsonify, request
-from api.config.db_link import linkdb
-from api.models.questions import GetAllquestion
+from config.db_link import linkdb
+from models.questions import GetAllquestion
 #from api.models.error_messages import ErrorMessage
 
 
