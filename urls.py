@@ -23,7 +23,7 @@ class Urls(object):
                          view_func=question_view, methods=['GET',])
         app.add_url_rule('/api/v1/questions/<int:question_id>/',
                           view_func=question_view, methods=['GET',])
-        app.add_url_rule('/api/v1/questions/', defaults={'question_id': None},
+        app.add_url_rule('/api/v1/questions/',
                           view_func=question_view, methods=['POST',])
         app.add_url_rule('/api/v1/auth/signup/', view_func=RegisterUser.as_view('register_user'),methods=["POST",])
         app.add_url_rule('/api/v1/auth/login/', view_func=LoginUser.as_view('login_user'),
